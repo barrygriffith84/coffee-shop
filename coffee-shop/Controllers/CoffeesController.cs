@@ -29,14 +29,35 @@ namespace CoffeeShop.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Get()
+        public async Task<IActionResult> Get(string BeanTypeParam, int Limit, string sort)
         {
             using (SqlConnection conn = Connection)
             {
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
-                    cmd.CommandText = "SELECT Id, Title, BeanType FROM Coffee";
+                    string query = "SELECT Id, Title, BeanType FROM Coffee ";
+
+                    if(Limit != 0)
+                    {
+                        query = $"SELECT TOP {Limit} Id, Title, BeanType FROM Coffee ";
+                    }
+
+                    if(BeanTypeParam != null)
+                    {
+                        query += $"WHERE BeanType = '{BeanTypeParam}'";
+                    }
+
+                    if (sort == "title")
+                    {
+                        query += "ORDER BY Title asc";
+                    }
+                    else if (sort == "beantype")
+                    {
+                        query += "ORDER BY BeanType asc";
+                    }
+
+                    cmd.CommandText = query;
                     SqlDataReader reader = cmd.ExecuteReader();
                     List<Coffee> coffees = new List<Coffee>();
 
